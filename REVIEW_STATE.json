@@ -1,0 +1,20 @@
+{
+  "round": 4,
+  "threadId": "019d6784-f7b7-79c1-a5b5-6090becbd3c0",
+  "status": "in_progress",
+  "last_score": 4.0,
+  "last_verdict": "not_ready_marginal_gains",
+  "pending_experiments": ["fedhypca_validation", "fedavg_validation"],
+  "timestamp": "2026-04-08T16:12:00",
+  "experiment_status": {
+    "fedhypca_validation": "running (PID 4031, restarted with Jacobian-disabled fix)",
+    "fedavg_validation": "pending"
+  },
+  "config": {
+    "model": "Qwen3.5-4B-base",
+    "data_per_org": 3000,
+    "rounds": 30,
+    "steps_per_epoch": 500
+  },
+  "fix_applied": "Disabled Jacobian computation in client.py to prevent OOM (scalar-weight-only aggregation, similar to ablation A2)"
+}
