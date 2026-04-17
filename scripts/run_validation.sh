@@ -13,7 +13,7 @@
 
 set -e
 
-MODEL="/root/autodl-tmp/model"
+MODEL="/home/qiqi/models/qwen3.5-4b"
 ROUNDS=30
 RESULTS_DIR="results/validation_v2"
 OUTPUT_DIR="outputs/validation_v2"

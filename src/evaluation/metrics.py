@@ -18,6 +18,7 @@ from collections import defaultdict
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from src.constraints.surrogates import must_refuse_constraint, overrefusal_constraint
 from configs.default import ORG_POLICIES, SAFETY_CATEGORIES
@@ -54,7 +55,7 @@ def evaluate_model(
     n_nll_tokens = 0
 
     with torch.no_grad():
-        for batch in loader:
+        for batch in tqdm(loader, desc=f"    Eval {org_id}", leave=False, unit="batch"):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
 
@@ -171,7 +172,7 @@ def evaluate_all_orgs(
     """
     all_org_metrics = {}
 
-    for org_id, splits in org_datasets.items():
+    for org_id, splits in tqdm(org_datasets.items(), desc="  Eval (personalized)", leave=False, unit="org"):
         if split_name not in splits:
             continue
 
@@ -202,7 +203,7 @@ def evaluate_all_orgs(
     if global_state is not None:
         model.set_lora_state_dict(global_state)
         agg_violations = []
-        for org_id, splits in org_datasets.items():
+        for org_id, splits in tqdm(org_datasets.items(), desc="  Eval (global/AggViol)", leave=False, unit="org"):
             if split_name not in splits:
                 continue
             agg_org = evaluate_model(

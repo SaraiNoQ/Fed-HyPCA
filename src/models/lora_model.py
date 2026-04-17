@@ -13,6 +13,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import LoraConfig, get_peft_model, PeftModel
 
 from src.models.refusal_head import RefusalHead
+from src.utils.gpu import get_device_map
 
 
 class FedHyPCAModel(nn.Module):
@@ -39,7 +40,7 @@ class FedHyPCAModel(nn.Module):
             model_config.model_name,
             quantization_config=bnb_config,
             torch_dtype=torch.bfloat16,
-            device_map="auto",
+            device_map=get_device_map(),
             trust_remote_code=True,
         )
 

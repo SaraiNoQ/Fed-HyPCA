@@ -4,7 +4,7 @@
 
 set -e
 
-MODEL="/root/autodl-tmp/model"
+MODEL="/home/qiqi/models/qwen3.5-4b"
 ROUNDS=50
 RESULTS_DIR="results/robustness"
 OUTPUT_DIR="outputs/robustness"

@@ -4,7 +4,7 @@
 
 set -e
 
-MODEL="/root/autodl-tmp/model"
+MODEL="/home/qiqi/models/qwen3.5-4b"
 RESULTS_DIR="results/sweep_beta_b"
 OUTPUT_DIR="outputs/sweep_beta_b"
 

@@ -12,6 +12,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from src.utils.gpu import get_device
 from src.constraints.surrogates import (
     must_refuse_constraint,
     overrefusal_constraint,
@@ -41,7 +42,7 @@ class FedClient:
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
         self.config = config
-        self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device or get_device()
 
         # Organization policy
         self.policy = ORG_POLICIES[org_id]
@@ -91,8 +92,10 @@ class FedClient:
         # Save initial state for proximal term
         if aggregation_type in ("fedprox", "fedhypca", "ditto", "pfedme"):
             initial_state = self.model.get_lora_state_dict()
+            # Move all tensors to the same device (first parameter's device)
+            first_device = next(iter(initial_state.values())).device
             initial_flat = torch.cat([
-                v.float().reshape(-1) for v in initial_state.values()
+                v.float().to(first_device).reshape(-1) for v in initial_state.values()
             ])
 
         # Ablation A6: if no personalization, start from global state and don't deviate
@@ -292,8 +295,25 @@ class FedClient:
                         accumulated_constraints = {}
                         accumulated_overrefusal = []
 
-        # Cache constraint values and Jacobians for server aggregation
-        self._compute_constraint_info_for_server(train_loader)
+        # Cache constraint values for server aggregation
+        # Reuse accumulated training-time values instead of expensive validation pass
+        if aggregation_type in ("fedhypca", "fedavg_dual", "ditto_dual"):
+            if accumulated_constraints:
+                self.last_constraint_values = {
+                    k: sum(vs) / len(vs)
+                    for k, vs in accumulated_constraints.items()
+                }
+            if accumulated_overrefusal:
+                self.last_overrefusal_value = (
+                    sum(accumulated_overrefusal) / len(accumulated_overrefusal)
+                )
+            # Jacobians stay zero (disabled for Qwen3.5-4B)
+            total_params = sum(p.numel() for p in trainable_params)
+            self.last_constraint_jacobians = {
+                k: torch.zeros(total_params, device=self.device)
+                for k in self.must_refuse_indices
+            }
+            self.last_overrefusal_jacobian = torch.zeros(total_params, device=self.device)
 
         # Store local state before returning (important: clients share model instance)
         self.last_local_state = self.model.get_lora_state_dict()

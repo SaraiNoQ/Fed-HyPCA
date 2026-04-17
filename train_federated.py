@@ -20,18 +20,20 @@ Usage:
     python train_federated.py --aggregation fedhypca --no_federation --seed 42
 """
 
+# GPU must be configured before any torch import
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from src.utils.gpu import configure_gpu_from_args, get_device
+configure_gpu_from_args(default=0)  # GPU 0 = RTX 5880 Ada
+
 import argparse
 import json
 import os
-import sys
 import time
-from pathlib import Path
 
 import torch
 from tqdm import tqdm
-
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
 
 from configs.default import ExperimentConfig, ModelConfig, TrainingConfig, DataConfig, EvalConfig
 from src.utils.seed import set_seed
@@ -47,12 +49,14 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Fed-HyPCA Federated Training")
 
     # Model
-    parser.add_argument("--model_name", type=str, default="/root/autodl-tmp/model")
+    parser.add_argument("--model_name", type=str, default="/home/qiqi/models/qwen3.5-4b")
     parser.add_argument("--lora_rank", type=int, default=16)
     parser.add_argument("--lora_alpha", type=int, default=32)
     parser.add_argument("--max_seq_length", type=int, default=1024)
     parser.add_argument("--load_in_4bit", action="store_true", default=True)
     parser.add_argument("--no_4bit", action="store_true", default=False)
+    parser.add_argument("--gpu_id", type=int, default=0,
+                        help="Physical GPU index (parsed before torch import)")
 
     # Federated training
     parser.add_argument("--aggregation", type=str, default="fedhypca",
@@ -217,7 +221,7 @@ def main():
     print(f"Config saved to {config_path}")
 
     # Device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     print(f"Using device: {device}")
 
     # Load tokenizer

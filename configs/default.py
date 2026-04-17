@@ -65,7 +65,7 @@ ORG_POLICIES = {
 
 @dataclass
 class ModelConfig:
-    model_name: str = "/root/autodl-tmp/model"  # Local Qwen3.5 4B-base on AutoDL
+    model_name: str = "/home/qiqi/models/qwen3.5-4b"  # Local Qwen3.5 4B-base
     lora_rank: int = 16
     lora_alpha: int = 32
     lora_dropout: float = 0.05

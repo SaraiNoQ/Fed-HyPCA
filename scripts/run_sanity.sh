@@ -5,7 +5,7 @@
 
 set -e
 
-MODEL="/root/autodl-tmp/model"
+MODEL="/home/qiqi/models/qwen3.5-4b"
 RESULTS_DIR="results/sanity"
 OUTPUT_DIR="outputs/sanity"
 
